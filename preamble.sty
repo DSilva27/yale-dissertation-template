@@ -1,0 +1,201 @@
+% ============================================================
+%  preamble.sty -- consolidated packages, settings, and macros
+%  Place in the project root, next to main.tex.
+%  Load with:  \usepackage{preamble}
+%
+%  Load order in this file is deliberate. hyperref must come
+%  near the end; only cleveref-type packages belong after it.
+%
+%  Items marked  >>> DECIDE <<<  need a choice from you before
+%  the document will compile as intended.
+% ============================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{preamble}[Yale September 10, 2026 dissertation preamble]
+
+% ---- main vs. supplementary numbering ------------------------------
+\newcommand{\mainnumbering}{%
+  \renewcommand{\thesection} {\thechapter.\arabic{section}}%
+  \renewcommand{\thefigure}  {\thechapter.\arabic{figure}}%
+  \renewcommand{\thetable}   {\thechapter.\arabic{table}}%
+  \renewcommand{\theequation}{\thechapter.\arabic{equation}}%
+  \def\theHsection {\thechapter.\arabic{section}}%
+  \def\theHfigure  {\thechapter.\arabic{figure}}%
+  \def\theHtable   {\thechapter.\arabic{table}}%
+  \def\theHequation{\thechapter.\arabic{equation}}%
+}
+
+\newcommand{\suppnumbering}{%
+  \setcounter{section}{0}%
+  \setcounter{figure}{0}%
+  \setcounter{table}{0}%
+  \setcounter{equation}{0}%
+  \renewcommand{\thesection} {S\thechapter.\arabic{section}}%
+  \renewcommand{\thefigure}  {S\thechapter.\arabic{figure}}%
+  \renewcommand{\thetable}   {S\thechapter.\arabic{table}}%
+  \renewcommand{\theequation}{S\thechapter.\arabic{equation}}%
+  \def\theHsection {\thechapter.S\arabic{section}}%
+  \def\theHfigure  {\thechapter.S\arabic{figure}}%
+  \def\theHtable   {\thechapter.S\arabic{table}}%
+  \def\theHequation{\thechapter.S\arabic{equation}}%
+}
+
+% restore main numbering at the start of every chapter
+\AddToHook{cmd/chapter/before}{\mainnumbering}
+
+% ---- per-chapter appendix heading ---------------------------------
+\newcommand{\chapterappendix}[1][Appendix]{%
+  \suppnumbering
+  \section*{#1}%
+  \addcontentsline{toc}{section}{#1}%
+}
+
+\newenvironment{chapterabstract}
+  {\begin{center}\bfseries\abstractname\end{center}%
+   \begin{quotation}\singlespacing\noindent\ignorespaces}
+  {\end{quotation}}
+% ============================================================
+%  1. ENCODING AND FONTS
+% ============================================================
+\RequirePackage[T1]{fontenc}        % 8-bit T1 fonts
+\RequirePackage[utf8]{inputenc}     % UTF-8 input
+\RequirePackage[english]{babel}
+\RequirePackage{microtype}          % microtypography
+
+
+% ============================================================
+%  2. PAGE LAYOUT AND LINE SPACING
+%  1in margins; footer baseline 0.5in from the bottom edge.
+%  If the class already loads geometry, delete the \RequirePackage
+%  line and keep only \geometry{...}.
+%  setspace single-spaces footnotes automatically.
+% ============================================================
+\RequirePackage[letterpaper,margin=1in,footskip=0.5in]{geometry}
+\RequirePackage{setspace}
+\doublespacing
+\RequirePackage{etoolbox}
+\AtBeginEnvironment{tabular}{\singlespacing}
+\AtBeginEnvironment{tabularx}{\singlespacing}
+\RequirePackage{placeins}
+
+% ============================================================
+%  3. MATHEMATICS
+%  showonlyrefs numbers only equations referenced with \eqref.
+%  Equations referenced with \cref lose their numbers, so use
+%  \eqref for equations throughout.
+% ============================================================
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}            % loads amsfonts; do not load amsfonts too
+\RequirePackage{bbm}                % \mathbbm{1}
+\RequirePackage{nicefrac}           % \nicefrac{1}{2}
+\RequirePackage{mathtools}
+%\mathtoolsset{showonlyrefs,showmanualtags}
+
+% ============================================================
+%  4. THEOREM ENVIRONMENTS
+%  amsthm is loaded by thmtools; thm-restate enables
+%  \begin{restatable} for restating results in appendices.
+%  Numbering: one shared counter, reset each chapter, so every
+%  result has a unique two-part number (Theorem 2.4, Lemma 2.5).
+%  A reader who sees "Lemma 2.5" can find it without knowing which
+%  kind of result it is, and there is no second Lemma 2.5 elsewhere.
+% ============================================================
+
+
+% ============================================================
+%  5. GRAPHICS, FLOATS, CAPTIONS, TABLES, LISTS
+% ============================================================
+\RequirePackage{graphicx}
+\graphicspath{{figures/}}
+\RequirePackage[format=plain,font={small,stretch=1},labelfont=bf,textfont=up]{caption}
+\captionsetup[table]{position=top}
+\captionsetup[figure]{position=bottom}
+\RequirePackage{subcaption}         % use \begin{subfigure}
+% \RequirePackage{subfig}           % REMOVED: incompatible with subcaption.
+                                    % If chapters use \subfloat, convert them
+                                    % to subfigure environments.
+\RequirePackage{booktabs}           % \toprule \midrule \bottomrule
+\RequirePackage{float}
+\RequirePackage{enumitem}
+
+% -- Custom float types (chemistry-style schemes and charts) --
+\newfloat{scheme}{htbp}{los}
+\floatname{scheme}{Scheme}
+\newfloat{chart}{htbp}{loc}         % was missing; \floatname{chart} needs it
+\floatname{chart}{Chart}
+\newfloat{graph}{htbp}{loh}
+\floatname{graph}{Graph}
+
+\RequirePackage{algorithm}
+\RequirePackage{algorithmic}
+\providecommand{\theHalgorithm}{\arabic{algorithm}}
+
+% ============================================================
+%  6. COLOUR AND STRIKEOUT
+% ============================================================
+\RequirePackage{xcolor}             % supersedes color; do not load both
+\RequirePackage[normalem]{ulem}     % \sout, used by \remove
+
+% ============================================================
+%  7. CHEMISTRY AND UNITS
+%  >>> DECIDE <<< chemformula (\ch{}) and mhchem (\ce{}) both
+%  provide formula typesetting and should not be combined.
+%  Keep whichever macro your chapters actually use.
+% ============================================================
+\RequirePackage{chemformula}                % \ch{H2O}
+% \RequirePackage[version=4]{mhchem}        % \ce{H2O}
+\RequirePackage{siunitx}                    % \qty{1.5}{\nano\metre}
+
+% ============================================================
+%  8. TABLE OF CONTENTS MACHINERY
+%  Required by main.tex for the separate appendix contents list.
+%  https://tex.stackexchange.com/questions/260445
+% ============================================================
+\RequirePackage{tocloft}
+\setlength{\cftbeforechapskip}{\baselineskip}
+\setlength{\cftbeforesecskip}{\baselineskip}
+\setlength{\cftbeforesubsecskip}{\baselineskip}
+\setlength{\cftbeforefigskip}{\baselineskip}
+\setlength{\cftbeforetabskip}{\baselineskip}
+\RequirePackage{etoc}
+
+% ============================================================
+%  9. BIBLIOGRAPHY
+%  >>> DECIDE <<< natbib and biblatex are mutually exclusive.
+%
+%  natbib (active below) matches the template's main.tex, which
+%  uses \bibliographystyle{apalike} and \bibliography{main.bib},
+%  compiled with bibtex.
+%
+%  To switch to biblatex instead: comment out natbib, uncomment
+%  the two biblatex lines, replace those two commands in main.tex
+%  with \printbibliography, and compile with biber.
+% ============================================================
+\RequirePackage[numbers,sort&compress]{natbib}
+% \RequirePackage[style=chem-acs,articletitle=true]{biblatex}
+% \addbibresource{main.bib}
+
+% ============================================================
+%  10. DRAFTING AIDS -- remove before submission
+% ============================================================
+\RequirePackage{blindtext}          % placeholder text
+% \includeonly{content/chapter-1}   % uncomment to compile one chapter
+
+% ============================================================
+%  11. LINKS AND CROSS-REFERENCES -- keep last
+%  hyperref provides \url, so the url package is not needed.
+%  cleveref must load after hyperref.
+% ============================================================
+\RequirePackage[hidelinks,unicode]{hyperref}
+\RequirePackage{fancyhdr}
+\fancypagestyle{yale}{\fancyhf{}\fancyfoot[R]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\pagestyle{yale}
+\RequirePackage{doi}                % \doi{} in bibliography entries (natbib)
+% \RequirePackage{xr-hyper}         % external references; load BEFORE hyperref
+                                    % and add \externaldocument{<file>}.
+                                    % Plain xr breaks under hyperref.
+\RequirePackage[capitalize,noabbrev]{cleveref}
+
+
+\endinput
